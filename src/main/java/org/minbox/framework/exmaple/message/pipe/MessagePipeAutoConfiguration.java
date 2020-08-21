@@ -28,7 +28,7 @@ public class MessagePipeAutoConfiguration {
     public MessagePipeConfiguration messagePipeConfiguration() {
         MessagePipeConfiguration configuration = MessagePipeConfiguration.defaultConfiguration();
         configuration.setLockTime(
-                new org.minbox.framework.message.pipe.server.config.MessagePipeConfiguration.LockTime()
+                new MessagePipeConfiguration.LockTime()
                         .setLeaseTime(10)
                         .setTimeUnit(TimeUnit.SECONDS)
         );
@@ -52,7 +52,6 @@ public class MessagePipeAutoConfiguration {
      */
     @Bean
     public ClientConfiguration clientConfiguration() {
-        return new ClientConfiguration()
-                .setBindPipeNames(new String[]{"test"});
+        return new ClientConfiguration();
     }
 }
