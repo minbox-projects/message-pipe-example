@@ -3,7 +3,7 @@
 
 
 
-## 环境准备
+## 1. 环境准备
 
 由于`message-pipe`是基于`Redis`实现的，所以我们本地需要安装`Redis`。
 
@@ -27,5 +27,18 @@ redis-cli
 select 1
 # 查看全部的数据
 keys *
+```
+
+
+
+## 2. 启动示例项目
+
+```sh
+# 下载源码
+git clone https://github.com/minbox-projects/message-pipe-example.git
+# 进入项目目录
+cd message-pipe-example
+# 运行项目
+mvn spring-boot:run
 ```
 
