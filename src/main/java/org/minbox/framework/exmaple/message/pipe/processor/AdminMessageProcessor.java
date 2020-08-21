@@ -20,11 +20,6 @@ public class AdminMessageProcessor implements MessageProcessor {
     @Override
     public boolean processing(String requestId, byte[] messageBody) {
         log.info("RequestId：{}，MessageBody：{}", requestId, new String(messageBody));
-        try {
-            Thread.sleep(5000);
-        }catch (Exception e){
-
-        }
         return true;
     }
 }
