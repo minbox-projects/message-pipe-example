@@ -22,7 +22,7 @@
     <properties>
         <java.version>1.8</java.version>
         <maven.test.skip>true</maven.test.skip>
-        <message-pipe.version>1.0.0-M1</message-pipe.version>
+        <message-pipe.version>1.0.0-M2</message-pipe.version>
     </properties>
     <dependencies>
         <dependency>

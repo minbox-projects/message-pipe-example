@@ -19,7 +19,8 @@ public class MessagePipeClientConfiguration {
     @Bean
     public ClientConfiguration clientConfiguration() {
         return new ClientConfiguration()
-                .setLocalPort(5201)
+                // 默认为5201
+                .setLocalPort(5202)
                 .setServerAddress("localhost")
                 .setServerPort(5200);
     }

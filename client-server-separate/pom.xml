@@ -15,6 +15,7 @@
     <modules>
         <module>client-example</module>
         <module>server-example</module>
+        <module>client-second-example</module>
     </modules>
     <artifactId>client-server-separate</artifactId>
 

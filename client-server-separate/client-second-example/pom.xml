@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>client-server-separate</artifactId>
+        <groupId>org.minbox.framework.exmaple</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>client-second-example</artifactId>
+    <description>
+        Message Pipe示例第二个Client端（多Client示例）。
+    </description>
+    <dependencies>
+        <dependency>
+            <groupId>org.minbox.framework</groupId>
+            <artifactId>message-pipe-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.minbox.framework</groupId>
+            <artifactId>message-pipe-spring-context</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>

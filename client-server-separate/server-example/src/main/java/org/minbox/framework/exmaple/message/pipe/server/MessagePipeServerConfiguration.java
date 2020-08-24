@@ -39,6 +39,8 @@ public class MessagePipeServerConfiguration {
      */
     @Bean
     public ServerConfiguration serverConfiguration() {
-        return new ServerConfiguration();
+        return new ServerConfiguration()
+                .setExpiredExcludeThresholdSeconds(10)
+                .setCheckClientExpiredIntervalSeconds(5);
     }
 }
