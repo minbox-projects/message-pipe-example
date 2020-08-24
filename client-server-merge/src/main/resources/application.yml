@@ -1,3 +1,4 @@
+
 spring:
   # Redis相关配置
   redis:
@@ -8,7 +9,5 @@ spring:
       pool:
         max-active: 200
         max-idle: 200
-
-#logging:
-#  level:
-#    org.minbox.framework.message.pipe.server.distribution: debug
+server:
+  port: 8082

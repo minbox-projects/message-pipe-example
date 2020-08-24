@@ -4,9 +4,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class MessagePipeApplication {
+public class MessagePipeMergeApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(MessagePipeApplication.class, args);
+        SpringApplication.run(MessagePipeMergeApplication.class, args);
     }
 }
