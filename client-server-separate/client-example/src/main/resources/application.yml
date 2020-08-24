@@ -1,0 +1,13 @@
+
+spring:
+  # Redis相关配置
+  redis:
+    port: 6379
+    timeout: 10000
+    database: 1
+    lettuce:
+      pool:
+        max-active: 200
+        max-idle: 200
+server:
+  port: 8081
