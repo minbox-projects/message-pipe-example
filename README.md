@@ -37,7 +37,7 @@ keys *
 # 下载源码
 git clone https://github.com/minbox-projects/message-pipe-example.git
 # 进入项目目录
-cd message-pipe-example
+cd message-pipe-example/client-server-merge
 # 运行项目
 mvn spring-boot:run
 ```
