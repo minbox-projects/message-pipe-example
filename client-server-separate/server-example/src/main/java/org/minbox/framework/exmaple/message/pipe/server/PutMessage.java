@@ -24,7 +24,7 @@ public class PutMessage {
     public PutMessage() {
         scheduledService.scheduleWithFixedDelay(() -> {
             for (int i = 0; i < 1000; i++) {
-                MessagePipe messagePipe = manager.getMessagePipe("test");
+                /*MessagePipe messagePipe = manager.getMessagePipe("test");
                 MessagePipe messagePipe2 = manager.getMessagePipe("admin");
                 MessagePipe messagePipe4 = manager.getMessagePipe("hengboy");
                 MessagePipe messagePipe5 = manager.getMessagePipe("yuqiyu");
@@ -32,9 +32,15 @@ public class PutMessage {
                 messagePipe2.put(message);
                 messagePipe.put(message);
                 messagePipe4.put(message);
-                messagePipe5.put(message);
+                messagePipe5.put(message);*/
+                MessagePipe testMessagePipe = manager.getMessagePipe("test");
+                MessagePipe messagePipe = manager.getMessagePipe("car.11111");
+                MessagePipe messagePipe2 = manager.getMessagePipe("car.22222");
+                Message message = new Message(String.valueOf(i).getBytes());
+                testMessagePipe.put(message);
+                messagePipe.put(message);
+                messagePipe2.put(message);
             }
         }, 2000, 500, TimeUnit.MILLISECONDS);
-
     }
 }
