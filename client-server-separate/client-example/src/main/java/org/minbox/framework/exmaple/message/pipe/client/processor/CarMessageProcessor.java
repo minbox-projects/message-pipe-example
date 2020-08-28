@@ -26,12 +26,10 @@ public class CarMessageProcessor implements MessageProcessor {
     @Override
     public boolean processing(String specificPipeName, String requestId, byte[] messageBody) {
         log.info("PipeName：{}，RequestId：{}，MessageBody：{}", specificPipeName, requestId, new String(messageBody));
-        if ("car.11111".equals(specificPipeName)) {
-            try {
-                Thread.sleep(new Random().nextInt(5000));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        try {
+            Thread.sleep(new Random().nextInt(2000));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return true;
     }
