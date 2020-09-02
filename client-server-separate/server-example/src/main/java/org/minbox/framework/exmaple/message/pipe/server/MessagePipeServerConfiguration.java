@@ -1,6 +1,7 @@
 package org.minbox.framework.exmaple.message.pipe.server;
 
 import com.alibaba.nacos.api.NacosFactory;
+import com.alibaba.nacos.api.PropertyKeyConst;
 import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.api.naming.NamingService;
 import org.minbox.framework.message.pipe.server.config.MessagePipeConfiguration;
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -57,8 +59,13 @@ public class MessagePipeServerConfiguration {
         return container;
     }
 
+
     @Bean
     public NamingService namingService() throws NacosException {
-        return NacosFactory.createNamingService("open.nacos.yuqiyu.com:80");
+        Properties properties = new Properties();
+        properties.put(PropertyKeyConst.USERNAME, "nacos");
+        properties.put(PropertyKeyConst.PASSWORD, "nacos");
+        properties.put(PropertyKeyConst.SERVER_ADDR, "open.nacos.yuqiyu.com:80");
+        return NacosFactory.createNamingService(properties);
     }
 }
