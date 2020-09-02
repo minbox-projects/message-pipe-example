@@ -4,6 +4,7 @@ import org.minbox.framework.message.pipe.core.Message;
 import org.minbox.framework.message.pipe.server.MessagePipe;
 import org.minbox.framework.message.pipe.server.manager.MessagePipeManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
 
 import java.util.UUID;
 import java.util.concurrent.Executors;
@@ -15,7 +16,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author 恒宇少年
  */
-//@Configuration
+@Configuration
 public class PutMessage {
     @Autowired
     private MessagePipeManager manager;
@@ -23,12 +24,12 @@ public class PutMessage {
 
     public PutMessage() {
         scheduledService.scheduleWithFixedDelay(() -> {
+            String id = UUID.randomUUID().toString();
+            Message message = new Message(id.getBytes());
             for (int i = 0; i < 100; i++) {
                 MessagePipe messagePipe = manager.getMessagePipe("test");
-                String id = UUID.randomUUID().toString();
-                Message message = new Message(id.getBytes());
                 messagePipe.put(message);
             }
-        }, 2000, 10, TimeUnit.MILLISECONDS);
+        }, 10, 10, TimeUnit.SECONDS);
     }
 }

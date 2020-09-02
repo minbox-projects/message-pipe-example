@@ -5,12 +5,11 @@ import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.listener.KeyspaceEventMessageListener;
 import org.springframework.data.redis.listener.PatternTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.stereotype.Component;
 
 /**
  * @author 恒宇少年
  */
-@Component
+//@Component
 public class ListMessageListener extends KeyspaceEventMessageListener {
     public ListMessageListener(RedisMessageListenerContainer listenerContainer) {
         super(listenerContainer);

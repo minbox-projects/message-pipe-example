@@ -20,6 +20,11 @@ public class TestMessageProcessor implements MessageProcessor {
     @Override
     public boolean processing(String specificPipeName, String requestId, byte[] messageBody) {
         log.info("PipeName：{}，RequestId：{}，MessageBody：{}", specificPipeName, requestId, new String(messageBody));
+        /*try {
+            Thread.sleep(2000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
         return true;
     }
 }
