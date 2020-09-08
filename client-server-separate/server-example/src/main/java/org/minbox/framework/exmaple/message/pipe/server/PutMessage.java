@@ -3,6 +3,7 @@ package org.minbox.framework.exmaple.message.pipe.server;
 import org.minbox.framework.message.pipe.core.Message;
 import org.minbox.framework.message.pipe.server.MessagePipe;
 import org.minbox.framework.message.pipe.server.manager.MessagePipeManager;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,19 +18,28 @@ import java.util.concurrent.TimeUnit;
  * @author 恒宇少年
  */
 @Configuration
-public class PutMessage {
+public class PutMessage implements InitializingBean {
     @Autowired
     private MessagePipeManager manager;
     ScheduledExecutorService scheduledService = Executors.newScheduledThreadPool(10);
 
-    public PutMessage() {
+    @Override
+    public void afterPropertiesSet() throws Exception {
+
         scheduledService.scheduleWithFixedDelay(() -> {
-            String id = UUID.randomUUID().toString();
-            Message message = new Message(id.getBytes());
-            for (int i = 0; i < 100; i++) {
-                MessagePipe messagePipe = manager.getMessagePipe("test");
-                messagePipe.put(message);
+            try {
+                for (int i = 0; i < 100; i++) {
+                    String id = UUID.randomUUID().toString();
+                    Message message = new Message(id.getBytes());
+                    message.getMetadata().put("traceId", UUID.randomUUID().toString());
+                    MessagePipe messagePipe = manager.getMessagePipe("test");
+                    messagePipe.putLast(message);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        }, 10, 10, TimeUnit.SECONDS);
+
+        }, 1000, 300, TimeUnit.MILLISECONDS);
+
     }
 }

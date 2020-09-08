@@ -3,14 +3,12 @@ package org.minbox.framework.exmaple.message.pipe.client.processor;
 import lombok.extern.slf4j.Slf4j;
 import org.minbox.framework.message.pipe.client.process.MessageProcessor;
 import org.minbox.framework.message.pipe.client.process.MessageProcessorType;
-import org.springframework.stereotype.Service;
-
-import java.util.Random;
+import org.minbox.framework.message.pipe.core.Message;
 
 /**
  * @author 恒宇少年
  */
-@Service
+//@Service
 @Slf4j
 public class CarMessageProcessor implements MessageProcessor {
     @Override
@@ -24,13 +22,9 @@ public class CarMessageProcessor implements MessageProcessor {
     }
 
     @Override
-    public boolean processing(String specificPipeName, String requestId, byte[] messageBody) {
+    public boolean processing(String specificPipeName, String requestId, Message message) {
+        byte[] messageBody = message.getBody();
         log.info("PipeName：{}，RequestId：{}，MessageBody：{}", specificPipeName, requestId, new String(messageBody));
-        try {
-            Thread.sleep(new Random().nextInt(2000));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         return true;
     }
 }

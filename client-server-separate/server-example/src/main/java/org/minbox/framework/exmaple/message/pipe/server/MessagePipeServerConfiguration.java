@@ -35,8 +35,7 @@ public class MessagePipeServerConfiguration {
         configuration.setLockTime(
                 new MessagePipeConfiguration.LockTime()
                         .setLeaseTime(10)
-                        .setTimeUnit(TimeUnit.SECONDS))
-                .setDistributionMessagePoolSize(10);
+                        .setTimeUnit(TimeUnit.SECONDS));
         return configuration;
     }
 

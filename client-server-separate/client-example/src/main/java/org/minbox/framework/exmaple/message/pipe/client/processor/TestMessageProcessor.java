@@ -2,7 +2,11 @@ package org.minbox.framework.exmaple.message.pipe.client.processor;
 
 import lombok.extern.slf4j.Slf4j;
 import org.minbox.framework.message.pipe.client.process.MessageProcessor;
+import org.minbox.framework.message.pipe.core.Message;
+import org.minbox.framework.message.pipe.core.untis.JsonUtils;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
 
 /**
  * 消息处理器
@@ -18,13 +22,11 @@ public class TestMessageProcessor implements MessageProcessor {
     }
 
     @Override
-    public boolean processing(String specificPipeName, String requestId, byte[] messageBody) {
-        log.info("PipeName：{}，RequestId：{}，MessageBody：{}", specificPipeName, requestId, new String(messageBody));
-        /*try {
-            Thread.sleep(2000);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
+    public boolean processing(String specificPipeName, String requestId, Message message) {
+        Map<String, Object> metadata = message.getMetadata();
+        byte[] messageBody = message.getBody();
+        log.info("PipeName：{}，RequestId：{}，MessageBody：{}，metadata：{}.",
+                specificPipeName, requestId, new String(messageBody), JsonUtils.objectToJson(message.getMetadata()));
         return true;
     }
 }

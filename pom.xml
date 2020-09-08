@@ -22,7 +22,8 @@
     <properties>
         <java.version>1.8</java.version>
         <maven.test.skip>true</maven.test.skip>
-        <message-pipe.version>1.0.2-SNAPSHOT</message-pipe.version>
+        <message-pipe.version>1.0.3-SNAPSHOT</message-pipe.version>
+        <redisson.version>3.13.3</redisson.version>
     </properties>
     <dependencies>
         <dependency>
@@ -36,7 +37,7 @@
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson-spring-boot-starter</artifactId>
-            <version>3.13.3</version>
+            <version>${redisson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
