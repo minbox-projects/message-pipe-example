@@ -1,0 +1,303 @@
+================================================================================
+Message Pipe 1.0.8-SNAPSHOT 压力测试项目 - 完成总结
+================================================================================
+
+创建时间：2025-12-23
+版本：1.0.8-SNAPSHOT
+状态：✓ 完全就绪
+
+================================================================================
+项目位置
+================================================================================
+
+主目录: /Users/yuqiyu/OpenSource/message-pipe-example/stress-test/
+
+项目结构：
+  server-stress-test/        - Server 压力测试应用
+  client-stress-test/        - Client 压力测试应用
+  README.md                  - 完整项目文档
+  QUICK_START.md             - 快速开始指南
+  PROJECT_SUMMARY.txt        - 本文件
+
+================================================================================
+编译状态
+================================================================================
+
+✓ Server 项目编译成功
+  JAR 文件：server-stress-test/target/message-pipe-server-stress-test-1.0.0.jar
+  大小：11 KB
+  主类：org.minbox.stress.test.server.ServerStressTestApplication
+
+✓ Client 项目编译成功
+  JAR 文件：client-stress-test/target/message-pipe-client-stress-test-1.0.0.jar
+  大小：13 KB
+  主类：org.minbox.stress.test.client.ClientStressTestApplication
+
+================================================================================
+技术栈
+================================================================================
+
+框架：
+  - Spring Boot 2.7.14
+  - Message Pipe 1.0.8-SNAPSHOT
+  - gRPC (for server-client communication)
+  - Redisson 3.20.1 (Redis client)
+
+构建：
+  - Java 17+
+  - Maven 3.6+
+
+存储：
+  - Redis 6.0+ (位置：10.147.17.17:6379, DB 5)
+
+================================================================================
+Redis 连接信息
+================================================================================
+
+Host：           10.147.17.17
+Port：           6379
+Password：       homeserver@2025
+Database：       5
+Connection Pool: max-active=20, max-idle=10, min-idle=5
+
+================================================================================
+应用端口配置
+================================================================================
+
+Server 应用：
+  - HTTP API 端口：        8081
+  - Message Pipe gRPC：     5200
+
+Client 应用：
+  - HTTP API 端口：        8082
+  - gRPC 监听端口：         5201
+
+================================================================================
+快速启动（3 个终端）
+================================================================================
+
+终端 1 - 启动 Server：
+  cd /Users/yuqiyu/OpenSource/message-pipe-example/stress-test/server-stress-test
+  mvn spring-boot:run
+
+终端 2 - 启动 Client：
+  cd /Users/yuqiyu/OpenSource/message-pipe-example/stress-test/client-stress-test
+  mvn spring-boot:run
+
+终端 3 - 执行测试：
+  # 发送 10000 条消息
+  curl -X POST http://localhost:8081/api/stress/publish-batch \
+    -H "Content-Type: application/json" \
+    -d '{"pipeName":"test-pipe","count":10000,"messagePrefix":"msg-"}'
+  
+  # 查看处理统计
+  curl http://localhost:8082/api/client/stats | python -m json.tool
+
+================================================================================
+Server API 端点
+================================================================================
+
+GET    /api/stress/publish              - 发送单条消息
+       参数：pipe (管道名), message (消息内容)
+
+POST   /api/stress/publish-batch        - 批量发送消息
+       body: {pipeName, count, messagePrefix}
+
+GET    /api/stress/stats                - 查看发送统计
+
+GET    /api/stress/health               - 健康检查
+
+POST   /api/stress/reset                - 重置统计
+
+================================================================================
+Client API 端点
+================================================================================
+
+GET    /api/client/stats                - 查看处理统计和速率
+       返回：{processedMessages, errorCount, elapsedMillis, messagesPerSecond}
+
+GET    /api/client/health               - 健康检查
+
+POST   /api/client/reset                - 重置统计
+
+================================================================================
+支持的消息处理器
+================================================================================
+
+1. DefaultPipeProcessor
+   - 管道：default-pipe
+   - 功能：处理默认管道消息
+
+2. TestPipeProcessor
+   - 管道：test-pipe
+   - 功能：处理测试管道消息
+
+3. OrderEventsProcessor
+   - 管道：order-events
+   - 功能：处理订单事件消息
+
+所有处理器均支持高吞吐量处理，每 1000 条消息输出一次处理速率。
+
+================================================================================
+主要特性
+================================================================================
+
+Server 端：
+  ✓ 基于 gRPC 的高性能消息分发
+  ✓ 支持多个命名管道并发操作
+  ✓ 自动消息计数和错误跟踪
+  ✓ RESTful 管理接口
+  ✓ 实时统计数据
+
+Client 端：
+  ✓ 自动注册和心跳检测
+  ✓ 支持多个消息处理器
+  ✓ 实时处理速率计算（msg/sec）
+  ✓ 故障恢复机制
+  ✓ 监控和统计 API
+
+================================================================================
+性能基准
+================================================================================
+
+预期吞吐量：
+  - 单个 Client：1000-5000 msg/sec（取决于消息大小和网络）
+  - 多个 Client：可线性扩展
+
+延迟：
+  - 消息端到端延迟：< 100ms（在良好网络条件下）
+
+内存占用：
+  - Server JVM：200-500 MB
+  - Client JVM：150-400 MB
+
+================================================================================
+测试场景
+================================================================================
+
+1. 基础功能测试
+   - 发送和接收单条消息
+   - 验证不同管道的隔离性
+   - 检查消息顺序保证
+
+2. 批量处理测试
+   - 10,000 条消息
+   - 100,000 条消息
+   - 1,000,000 条消息
+
+3. 并发测试
+   - 多个管道同时发送
+   - 多个 Client 实例处理
+   - 持续负载测试
+
+4. 失败恢复测试
+   - Client 断网重连
+   - Server 重启
+   - Redis 连接恢复
+
+================================================================================
+文件清单
+================================================================================
+
+根目录：
+  ├── README.md                     - 完整项目文档（6.9 KB）
+  ├── QUICK_START.md                - 快速开始指南（8.5 KB）
+  ├── PROJECT_SUMMARY.txt           - 本文件
+  └── setup-projects.sh             - 项目初始化脚本
+
+Server 项目：
+  server-stress-test/
+  ├── pom.xml                       - Maven 配置
+  ├── src/
+  │   └── main/
+  │       ├── java/.../ServerStressTestApplication.java
+  │       └── resources/application.yml
+  └── target/
+      └── message-pipe-server-stress-test-1.0.0.jar
+
+Client 项目：
+  client-stress-test/
+  ├── pom.xml                       - Maven 配置
+  ├── src/
+  │   └── main/
+  │       ├── java/.../ClientStressTestApplication.java
+  │       └── resources/application.yml
+  └── target/
+      └── message-pipe-client-stress-test-1.0.0.jar
+
+================================================================================
+Git 信息
+================================================================================
+
+分支名：load-test/stress-test
+位置：/Users/yuqiyu/OpenSource/message-pipe 中
+
+注意：
+  - 测试项目在独立的工作目录中创建
+  - 不会污染主代码库
+  - 可以独立于主项目进行开发
+
+================================================================================
+下一步
+================================================================================
+
+1. 启动应用
+   按照"快速启动"章节启动 Server 和 Client 应用
+
+2. 验证连接
+   检查应用日志确保成功连接到 Redis 和彼此
+
+3. 执行测试
+   从"测试场景"选择适合的测试用例执行
+
+4. 分析结果
+   使用 API 端点获取统计数据并分析性能
+
+5. 调优配置
+   根据测试结果调整 pom.xml 中的参数
+
+================================================================================
+常见问题
+================================================================================
+
+Q: 如何修改 Redis 连接参数？
+A: 编辑 server-stress-test/src/main/resources/application.yml 和
+   client-stress-test/src/main/resources/application.yml
+
+Q: 如何调整 gRPC 端口？
+A: 修改 pom.xml 中的 ServerConfiguration 中的 setServerPort 参数
+
+Q: 如何增加更多的消息处理器？
+A: 在 ClientStressTestApplication 中添加新的 @Component 类
+   实现 MessageProcessor 接口
+
+Q: 如何重新编译项目？
+A: cd 到项目目录，执行 mvn clean package -DskipTests
+
+================================================================================
+联系方式和支持
+================================================================================
+
+Message Pipe 官方：
+  - GitHub: https://github.com/minbox-projects/message-pipe
+  - 示例项目: https://github.com/minbox-projects/message-pipe-example
+
+本项目文档：
+  - 完整指南：/Users/yuqiyu/OpenSource/message-pipe-example/stress-test/README.md
+  - 快速开始：/Users/yuqiyu/OpenSource/message-pipe-example/stress-test/QUICK_START.md
+
+================================================================================
+版本信息
+================================================================================
+
+Message Pipe：     1.0.8-SNAPSHOT
+Spring Boot：      2.7.14
+Java：             17+
+Maven：            3.6+
+Redisson：         3.20.1
+Lombok：           1.18.30
+
+编译日期：         2025-12-23
+编译状态：         成功 ✓
+
+================================================================================

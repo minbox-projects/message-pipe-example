@@ -1,0 +1,160 @@
+================================================================================
+压力测试项目迁移完成 ✓
+================================================================================
+
+从：/Users/yuqiyu/stress-test-workspace/
+到：/Users/yuqiyu/OpenSource/message-pipe-example/stress-test/
+
+迁移日期：2025-12-23
+迁移状态：成功 ✓
+
+================================================================================
+迁移内容
+================================================================================
+
+✓ Server 压力测试项目
+✓ Client 压力测试项目
+✓ 完整的文档（README、QUICK_START、PROJECT_SUMMARY）
+✓ 项目初始化脚本
+✓ Maven 构建配置
+✓ 编译后的 JAR 文件
+
+================================================================================
+文档清单
+================================================================================
+
+在 /Users/yuqiyu/OpenSource/message-pipe-example/stress-test/ 中：
+
+1. INDEX.md                    ← 项目导航（从这里开始！）
+2. QUICK_START.md              ← 快速开始指南（3 步启动）
+3. README.md                   ← 完整项目文档
+4. PROJECT_SUMMARY.txt         ← 项目技术总结
+5. MIGRATION_INFO.txt          ← 本文件
+
+================================================================================
+关键位置更新
+================================================================================
+
+所有路径已从：
+  /Users/yuqiyu/stress-test-workspace/
+
+更新为：
+  /Users/yuqiyu/OpenSource/message-pipe-example/stress-test/
+
+包括：
+  ✓ 文档中的路径引用
+  ✓ 快速启动命令
+  ✓ 清理脚本
+  ✓ 所有文档链接
+
+================================================================================
+快速启动命令（更新后）
+================================================================================
+
+终端 1 - Server：
+  cd /Users/yuqiyu/OpenSource/message-pipe-example/stress-test/server-stress-test
+  mvn spring-boot:run
+
+终端 2 - Client：
+  cd /Users/yuqiyu/OpenSource/message-pipe-example/stress-test/client-stress-test
+  mvn spring-boot:run
+
+终端 3 - 测试：
+  curl -X POST http://localhost:8081/api/stress/publish-batch \
+    -H "Content-Type: application/json" \
+    -d '{"pipeName":"test-pipe","count":10000,"messagePrefix":"msg-"}'
+
+  curl http://localhost:8082/api/client/stats | python -m json.tool
+
+================================================================================
+文件结构
+================================================================================
+
+/Users/yuqiyu/OpenSource/message-pipe-example/stress-test/
+├── INDEX.md                           # 项目导航（推荐首先阅读！）
+├── QUICK_START.md                     # 快速开始指南
+├── README.md                          # 完整文档
+├── PROJECT_SUMMARY.txt                # 技术总结
+├── MIGRATION_INFO.txt                 # 迁移信息（本文件）
+├── setup-projects.sh                  # 项目初始化脚本
+│
+├── server-stress-test/                # Server 项目
+│   ├── pom.xml
+│   ├── src/main/java/.../ServerStressTestApplication.java
+│   ├── src/main/resources/application.yml
+│   └── target/
+│       └── message-pipe-server-stress-test-1.0.0.jar
+│
+└── client-stress-test/                # Client 项目
+    ├── pom.xml
+    ├── src/main/java/.../ClientStressTestApplication.java
+    ├── src/main/resources/application.yml
+    └── target/
+        └── message-pipe-client-stress-test-1.0.0.jar
+
+================================================================================
+项目状态
+================================================================================
+
+✓ Server 项目编译成功  (11 KB JAR)
+✓ Client 项目编译成功  (13 KB JAR)
+✓ 所有文档已更新
+✓ 路径引用已更新
+✓ 临时目录已清理
+
+================================================================================
+下一步
+================================================================================
+
+1. 阅读导航文件：INDEX.md
+2. 按照 QUICK_START.md 启动应用
+3. 执行压力测试
+
+================================================================================
+技术信息
+================================================================================
+
+Message Pipe：    1.0.8-SNAPSHOT
+Spring Boot：     2.7.14
+Java：            17+
+Redisson：        3.20.1
+gRPC：            集成于 Message Pipe
+
+Server 端口：
+  - HTTP：8081
+  - gRPC：5200
+
+Client 端口：
+  - HTTP：8082
+  - gRPC：5201
+
+Redis 配置：
+  - Host：10.147.17.17
+  - Port：6379
+  - Password：homeserver@2025
+  - Database：5
+
+================================================================================
+分支信息
+================================================================================
+
+分支名：load-test/stress-test
+位置：/Users/yuqiyu/OpenSource/message-pipe 中
+
+注意：测试代码不会提交到 Git（符合要求）
+
+================================================================================
+需要帮助？
+================================================================================
+
+查看对应的文档文件：
+
+快速问题        → QUICK_START.md 中的"常见问题"章节
+详细配置        → README.md 中的"配置说明"章节
+技术栈信息      → PROJECT_SUMMARY.txt
+API 参考        → QUICK_START.md 中的"API 端点"章节
+性能优化        → README.md 中的"监控和统计"章节
+
+================================================================================
+迁移完成时间戳：2025-12-23 13:27 UTC+8
+================================================================================

@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: message-pipe-client-stress-test
+  redis:
+    host: 10.147.17.17
+    port: 6379
+    password: homeserver@2025
+    database: 5
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 20
+        max-idle: 10
+        min-idle: 5
+        max-wait: -1ms
+
+server:
+  port: 8082
+  servlet:
+    context-path: /
+
+logging:
+  level:
+    root: INFO
+    org.minbox.framework: DEBUG
+    org.springframework.boot: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+message:
+  pipe:
+    client:
+      server-address: localhost
+      server-port: 5200
+      local-port: 5201

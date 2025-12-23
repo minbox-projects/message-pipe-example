@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.minbox.framework.exmaple</groupId>
+        <artifactId>message-pipe</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>..</relativePath>
+    </parent>
+
+    <artifactId>message-pipe-stress-test</artifactId>
+    <packaging>pom</packaging>
+    <name>Message Pipe Stress Test</name>
+    <description>Stress test modules for message-pipe</description>
+    <properties>
+        <spring-boot.version>2.7.6</spring-boot.version>
+        <message-pipe.version>1.0.8-SNAPSHOT</message-pipe.version>
+    </properties>
+    <modules>
+        <module>client-stress-test</module>
+        <module>server-stress-test</module>
+    </modules>
+
+</project>
