@@ -14,6 +14,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -47,12 +49,9 @@ public class ServerStressTestApplication {
         @Bean
         public MessagePipeConfiguration messagePipeConfiguration() {
             MessagePipeConfiguration configuration = MessagePipeConfiguration.defaultConfiguration();
-            configuration.setLockTime(
-                    new MessagePipeConfiguration.LockTime()
-                            .setWaitTime(5)
-                            .setLeaseTime(10)
-                            .setTimeUnit(TimeUnit.SECONDS)
-            );
+            // 每次批量处理1000条消息
+            configuration.setBatchSize(1000);
+            // customer config
             return configuration;
         }
 
@@ -116,29 +115,36 @@ public class ServerStressTestApplication {
          */
         @PostMapping("/publish-batch")
         public StressResponse publishBatch(@RequestBody BatchPublishRequest request) {
+            long startTime = System.currentTimeMillis();
             try {
                 MessagePipe pipe = messagePipeManager.createMessagePipe(request.getPipeName());
+                List<Message> messages = new ArrayList<>(request.getCount());
 
                 for (int i = 0; i < request.getCount(); i++) {
                     String content = request.getMessagePrefix() + request.getTimestamp() + "-" + i;
                     Message message = new Message(content.getBytes("UTF-8"));
-                    pipe.putLast(message);
-
-                    long total = messageCounter.incrementAndGet();
-                    if (total % 1000 == 0) {
-                        log.info("Published {} messages so far", total);
-                    }
+                    messages.add(message);
                 }
 
+                pipe.putLastBatch(messages);
+                long total = messageCounter.addAndGet(request.getCount());
+
+                if (total % 1000 == 0) {
+                    log.info("Published {} messages so far", total);
+                }
+
+                long duration = System.currentTimeMillis() - startTime;
                 return new StressResponse(true,
                         "Batch published: " + request.getCount() + " messages",
                         messageCounter.get(),
-                        errorCounter.get());
+                        errorCounter.get(),
+                        duration);
 
             } catch (Exception e) {
                 errorCounter.addAndGet(request.getCount());
+                long duration = System.currentTimeMillis() - startTime;
                 log.error("Failed to publish batch to pipe: {}", request.getPipeName(), e);
-                return new StressResponse(false, "Error: " + e.getMessage(), messageCounter.get(), errorCounter.get());
+                return new StressResponse(false, "Error: " + e.getMessage(), messageCounter.get(), errorCounter.get(), duration);
             }
         }
 
@@ -185,6 +191,7 @@ public class ServerStressTestApplication {
         public long totalMessages;
         public long totalErrors;
         public long timestamp;
+        public long duration;  // 执行耗时，单位：毫秒
 
         public StressResponse(boolean success, String message, long totalMessages, long totalErrors) {
             this.success = success;
@@ -192,6 +199,16 @@ public class ServerStressTestApplication {
             this.totalMessages = totalMessages;
             this.totalErrors = totalErrors;
             this.timestamp = System.currentTimeMillis();
+            this.duration = 0;
+        }
+
+        public StressResponse(boolean success, String message, long totalMessages, long totalErrors, long duration) {
+            this.success = success;
+            this.message = message;
+            this.totalMessages = totalMessages;
+            this.totalErrors = totalErrors;
+            this.timestamp = System.currentTimeMillis();
+            this.duration = duration;
         }
 
         public boolean isSuccess() { return success; }
@@ -199,6 +216,7 @@ public class ServerStressTestApplication {
         public long getTotalMessages() { return totalMessages; }
         public long getTotalErrors() { return totalErrors; }
         public long getTimestamp() { return timestamp; }
+        public long getDuration() { return duration; }
     }
 
     public static class StatsResponse {

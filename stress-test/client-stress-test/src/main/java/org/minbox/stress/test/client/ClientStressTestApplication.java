@@ -49,7 +49,7 @@ public class ClientStressTestApplication {
                     // Port for client server
                     .setServerAddress("localhost")                  // Server address
                     .setServerPort(5200)                            // Server port
-                    .setRetryRegisterTimes(3)                       // Retry count for registration
+                    .setRetryRegisterTimes(10)                       // Retry count for registration
                     .setRetryRegisterIntervalMilliSeconds(1000)     // Retry interval ms
                     .setHeartBeatIntervalSeconds(10);               // Heartbeat interval seconds
         }
@@ -79,7 +79,6 @@ public class ClientStressTestApplication {
                     double rate = (processed * 1000.0) / elapsed;
                     log.info("Processed {} messages (Rate: {} msg/sec)", processed, rate);
                 }
-
                 return true;
             } catch (Exception e) {
                 errorCounter.incrementAndGet();
