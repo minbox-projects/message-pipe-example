@@ -1,5 +1,6 @@
 package org.minbox.stress.test.server;
 
+import com.alibaba.nacos.client.naming.NacosNamingService;
 import lombok.extern.slf4j.Slf4j;
 import org.minbox.framework.message.pipe.core.Message;
 import org.minbox.framework.message.pipe.server.MessagePipe;
@@ -10,12 +11,19 @@ import org.minbox.framework.message.pipe.spring.annotation.ServerServiceType;
 import org.minbox.framework.message.pipe.spring.annotation.server.EnableMessagePipeServer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.*;
+import com.alibaba.nacos.api.NacosFactory;
+import com.alibaba.nacos.api.PropertyKeyConst;
+import com.alibaba.nacos.api.exception.NacosException;
+import com.alibaba.nacos.api.naming.NamingService;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -24,6 +32,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * Provides REST endpoints to simulate message publishing for stress testing
  */
 @SpringBootApplication
+@EnableMessagePipeServer(serverType = ServerServiceType.NACOS)
 @Slf4j
 public class ServerStressTestApplication {
 
@@ -39,8 +48,25 @@ public class ServerStressTestApplication {
      * Server configuration bean
      */
     @Configuration
-    @EnableMessagePipeServer(serverType = ServerServiceType.GRPC)
     public static class ServerConfig {
+
+        /**
+         * Create NamingService bean for Nacos service discovery
+         * Reads configuration from application.yml
+         */
+        @Bean
+        public NamingService namingService(
+                @org.springframework.beans.factory.annotation.Value("${spring.cloud.nacos.server-addr}") String serverAddr,
+                @org.springframework.beans.factory.annotation.Value("${spring.cloud.nacos.username}") String username,
+                @org.springframework.beans.factory.annotation.Value("${spring.cloud.nacos.password}") String password,
+                @org.springframework.beans.factory.annotation.Value("${spring.cloud.nacos.discovery.namespace}") String namespace) throws NacosException {
+            Properties properties = new Properties();
+            properties.put(PropertyKeyConst.SERVER_ADDR, serverAddr);
+            properties.put(PropertyKeyConst.USERNAME, username);
+            properties.put(PropertyKeyConst.PASSWORD, password);
+            properties.put(PropertyKeyConst.NAMESPACE, namespace);
+            return NacosFactory.createNamingService(properties);
+        }
 
         /**
          * Global MessagePipe configuration
@@ -49,8 +75,10 @@ public class ServerStressTestApplication {
         @Bean
         public MessagePipeConfiguration messagePipeConfiguration() {
             MessagePipeConfiguration configuration = MessagePipeConfiguration.defaultConfiguration();
-            // 每次批量处理1000条消息
-            configuration.setBatchSize(1000);
+            // 每次批量处理100条消息
+            configuration.setBatchSize(100);
+            // 设置grpc请求过期最大时间为60秒
+            configuration.setMessageRequestTimeoutMillis(60000);
             // customer config
             return configuration;
         }
@@ -62,7 +90,7 @@ public class ServerStressTestApplication {
                     .setExpiredPoolSize(10)                           // Thread pool size for client expiration
                     .setExpiredExcludeThresholdSeconds(30)            // Client timeout threshold (seconds)
                     .setCheckClientExpiredIntervalSeconds(5)          // Check interval (seconds)
-                    .setMaxMessagePipeCount(1000)                     // Max concurrent pipes
+                    .setMaxMessagePipeCount(10000)                     // Max concurrent pipes
                     .setCleanupExpiredMessagePipeIntervalSeconds(10)  // Cleanup interval (seconds)
                     .setCleanupExpiredMessagePipeThresholdSeconds(1800); // Pipe timeout (1800 seconds)
         }
@@ -93,7 +121,7 @@ public class ServerStressTestApplication {
 
             try {
                 MessagePipe pipe = messagePipeManager.createMessagePipe(pipeName);
-                Message message = new Message(messageContent.getBytes("UTF-8"));
+                Message message = new Message(messageContent.getBytes(StandardCharsets.UTF_8));
                 pipe.putLast(message);
 
                 long totalMessages = messageCounter.incrementAndGet();
@@ -122,11 +150,11 @@ public class ServerStressTestApplication {
 
                 for (int i = 0; i < request.getCount(); i++) {
                     String content = request.getMessagePrefix() + request.getTimestamp() + "-" + i;
-                    Message message = new Message(content.getBytes("UTF-8"));
+                    Message message = new Message(content.getBytes(StandardCharsets.UTF_8));
                     messages.add(message);
                 }
 
-                pipe.putLastBatch(messages);
+                pipe.putLastBatchOnLock(messages);
                 long total = messageCounter.addAndGet(request.getCount());
 
                 if (total % 1000 == 0) {

@@ -1,18 +1,41 @@
 spring:
   application:
     name: message-pipe-server-stress-test
+  cloud:
+    nacos:
+      server-addr: xxxx
+      username: kejin_test
+      password: xxx
+      discovery:
+        namespace: kejin_test
   redis:
-    host: 10.147.17.17
+    host: 127.0.0.1
     port: 6379
     password: homeserver@2025
     database: 5
-    timeout: 2000ms
-    lettuce:
-      pool:
-        max-active: 20
-        max-idle: 10
-        min-idle: 5
-        max-wait: -1ms
+    timeout: 100000
+    redisson:
+      config: |
+        singleServerConfig:
+          idleConnectionTimeout: 300000
+          connectTimeout: 15000
+          timeout: 100000
+          retryAttempts: 3
+          retryInterval: 1500
+          password: ${spring.redis.password}
+          subscriptionsPerConnection: 5
+          clientName: null
+          address: redis://${spring.redis.host}:${spring.redis.port}
+          subscriptionConnectionMinimumIdleSize: 1
+          subscriptionConnectionPoolSize: 100
+          connectionMinimumIdleSize: 64
+          connectionPoolSize: 512
+          database: ${spring.redis.database}
+          dnsMonitoringInterval: 5000
+          pingConnectionInterval: 30000
+        threads: 16
+        nettyThreads: 32
+        transportMode: "NIO"
 
 server:
   port: 8081

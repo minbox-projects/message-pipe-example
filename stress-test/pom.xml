@@ -17,7 +17,6 @@
     <description>Stress test modules for message-pipe</description>
     <properties>
         <spring-boot.version>2.7.6</spring-boot.version>
-        <message-pipe.version>1.0.8-SNAPSHOT</message-pipe.version>
     </properties>
     <modules>
         <module>client-stress-test</module>

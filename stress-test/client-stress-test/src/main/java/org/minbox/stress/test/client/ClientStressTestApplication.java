@@ -1,6 +1,8 @@
 package org.minbox.stress.test.client;
 
+import com.alibaba.nacos.client.naming.NacosNamingService;
 import lombok.extern.slf4j.Slf4j;
+import org.minbox.framework.message.pipe.client.process.MessageProcessorType;
 import org.minbox.framework.message.pipe.core.Message;
 import org.minbox.framework.message.pipe.client.config.ClientConfiguration;
 import org.minbox.framework.message.pipe.client.process.MessageProcessor;
@@ -8,11 +10,19 @@ import org.minbox.framework.message.pipe.spring.annotation.ServerServiceType;
 import org.minbox.framework.message.pipe.spring.annotation.client.EnableMessagePipeClient;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
+import com.alibaba.nacos.api.NacosFactory;
+import com.alibaba.nacos.api.PropertyKeyConst;
+import com.alibaba.nacos.api.exception.NacosException;
+import com.alibaba.nacos.api.naming.NamingService;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -20,7 +30,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * Simulates multiple clients receiving and processing messages
  */
 @SpringBootApplication
-@EnableMessagePipeClient(serverType = ServerServiceType.GRPC)
+@EnableMessagePipeClient(serverType = ServerServiceType.NACOS)
 @Slf4j
 public class ClientStressTestApplication {
 
@@ -35,23 +45,112 @@ public class ClientStressTestApplication {
     }
 
     /**
+     * Message Pipe Client Configuration Properties
+     */
+    @org.springframework.boot.context.properties.ConfigurationProperties(prefix = "message.pipe.client")
+    @Component
+    public static class MessagePipeClientProperties {
+        private int localPort = 5201;
+        private String serverAddress = "localhost";
+        private int serverPort = 5200;
+        private String networkInterface = "en11";
+        private int retryRegisterTimes = 10;
+        private int retryRegisterIntervalMilliSeconds = 1000;
+        private int heartBeatIntervalSeconds = 10;
+
+        public int getLocalPort() {
+            return localPort;
+        }
+
+        public void setLocalPort(int localPort) {
+            this.localPort = localPort;
+        }
+
+        public String getServerAddress() {
+            return serverAddress;
+        }
+
+        public void setServerAddress(String serverAddress) {
+            this.serverAddress = serverAddress;
+        }
+
+        public int getServerPort() {
+            return serverPort;
+        }
+
+        public void setServerPort(int serverPort) {
+            this.serverPort = serverPort;
+        }
+
+        public String getNetworkInterface() {
+            return networkInterface;
+        }
+
+        public void setNetworkInterface(String networkInterface) {
+            this.networkInterface = networkInterface;
+        }
+
+        public int getRetryRegisterTimes() {
+            return retryRegisterTimes;
+        }
+
+        public void setRetryRegisterTimes(int retryRegisterTimes) {
+            this.retryRegisterTimes = retryRegisterTimes;
+        }
+
+        public int getRetryRegisterIntervalMilliSeconds() {
+            return retryRegisterIntervalMilliSeconds;
+        }
+
+        public void setRetryRegisterIntervalMilliSeconds(int retryRegisterIntervalMilliSeconds) {
+            this.retryRegisterIntervalMilliSeconds = retryRegisterIntervalMilliSeconds;
+        }
+
+        public int getHeartBeatIntervalSeconds() {
+            return heartBeatIntervalSeconds;
+        }
+
+        public void setHeartBeatIntervalSeconds(int heartBeatIntervalSeconds) {
+            this.heartBeatIntervalSeconds = heartBeatIntervalSeconds;
+        }
+    }
+
+    /**
      * Client configuration bean
      */
     @Configuration
     public static class ClientConfig {
 
+        /**
+         * Create NamingService bean for Nacos service discovery
+         * Reads configuration from application.yml
+         */
         @Bean
-        public ClientConfiguration clientConfiguration() {
+        public NamingService namingService(
+                @org.springframework.beans.factory.annotation.Value("${spring.cloud.nacos.server-addr}") String serverAddr,
+                @org.springframework.beans.factory.annotation.Value("${spring.cloud.nacos.username}") String username,
+                @org.springframework.beans.factory.annotation.Value("${spring.cloud.nacos.password}") String password,
+                @org.springframework.beans.factory.annotation.Value("${spring.cloud.nacos.discovery.namespace}") String namespace) throws NacosException {
+            Properties properties = new Properties();
+            properties.put(PropertyKeyConst.SERVER_ADDR, serverAddr);
+            properties.put(PropertyKeyConst.USERNAME, username);
+            properties.put(PropertyKeyConst.PASSWORD, password);
+            properties.put(PropertyKeyConst.NAMESPACE, namespace);
+            return NacosFactory.createNamingService(properties);
+        }
+
+        @Bean
+        public ClientConfiguration clientConfiguration(MessagePipeClientProperties properties) {
             return new ClientConfiguration()
-                    .setLocalPort(5201)
-                    .setNetworkInterface("en11")
+                    .setLocalPort(properties.getLocalPort())
+                    .setNetworkInterface(properties.getNetworkInterface())
                     //.setLocalHost("localhost")
                     // Port for client server
-                    .setServerAddress("localhost")                  // Server address
-                    .setServerPort(5200)                            // Server port
-                    .setRetryRegisterTimes(10)                       // Retry count for registration
-                    .setRetryRegisterIntervalMilliSeconds(1000)     // Retry interval ms
-                    .setHeartBeatIntervalSeconds(10);               // Heartbeat interval seconds
+                    .setServerAddress(properties.getServerAddress())        // Server address
+                    .setServerPort(properties.getServerPort())              // Server port
+                    .setRetryRegisterTimes(properties.getRetryRegisterTimes())                       // Retry count for registration
+                    .setRetryRegisterIntervalMilliSeconds(properties.getRetryRegisterIntervalMilliSeconds())     // Retry interval ms
+                    .setHeartBeatIntervalSeconds(properties.getHeartBeatIntervalSeconds());               // Heartbeat interval seconds
         }
     }
 
@@ -156,6 +255,52 @@ public class ClientStressTestApplication {
                 log.error("Error processing order event: {}", e.getMessage());
                 return false;
             }
+        }
+    }
+
+    /**
+     * Message Processor for pipe* (regex pattern)
+     * Handles all pipes matching pattern: pipe-0, pipe-1, pipe-2, ...
+     */
+    @Component
+    @Slf4j
+    public static class PipePatternProcessor implements MessageProcessor {
+
+        @Override
+        public String bindingPipeName() {
+            // Use regex pattern to match pipe-*, pipe_*, etc.
+            return "pipe-*";
+        }
+
+        @Override
+        public boolean processing(String specificPipeName, String requestId, Message message) {
+            try {
+                String content = new String(message.getBody(), StandardCharsets.UTF_8);
+                log.info("[" + specificPipeName + "] 消息：{}.", content);
+                long processed = processedCounter.incrementAndGet();
+
+                // Log every 10000 messages to reduce log volume
+                if (processed % 10000 == 0) {
+                    log.info("[{}] Processed {} messages so far, current: {}",
+                            specificPipeName, processed, content);
+                } else if (processed % 1000 == 0) {
+                    long elapsed = System.currentTimeMillis() - startTime.get();
+                    double rate = (processed * 1000.0) / elapsed;
+                    log.debug("[{}] Processed {} messages (Rate: {} msg/sec)",
+                            specificPipeName, processed, rate);
+                }
+
+                return true;
+            } catch (Exception e) {
+                errorCounter.incrementAndGet();
+                log.error("[{}] Error processing message: {}", specificPipeName, e.getMessage());
+                return false;
+            }
+        }
+
+        @Override
+        public MessageProcessorType processorType() {
+            return MessageProcessorType.REGEX;
         }
     }
 

@@ -1,18 +1,41 @@
 spring:
   application:
     name: message-pipe-client-stress-test
+  cloud:
+    nacos:
+      server-addr: xxx
+      username: kejin_test
+      password: xx
+      discovery:
+        namespace: kejin_test
   redis:
-    host: 10.147.17.17
+    host: 127.0.0.1
     port: 6379
     password: homeserver@2025
     database: 5
-    timeout: 2000ms
-    lettuce:
-      pool:
-        max-active: 20
-        max-idle: 10
-        min-idle: 5
-        max-wait: -1ms
+    timeout: 15000
+    redisson:
+      config: |
+        singleServerConfig:
+          idleConnectionTimeout: 300000
+          connectTimeout: 15000
+          timeout: 30000
+          retryAttempts: 3
+          retryInterval: 1500
+          password: ${spring.redis.password}
+          subscriptionsPerConnection: 5
+          clientName: null
+          address: redis://${spring.redis.host}:${spring.redis.port}
+          subscriptionConnectionMinimumIdleSize: 1
+          subscriptionConnectionPoolSize: 100
+          connectionMinimumIdleSize: 64
+          connectionPoolSize: 512
+          database: ${spring.redis.database}
+          dnsMonitoringInterval: 5000
+          pingConnectionInterval: 30000
+        threads: 16
+        nettyThreads: 32
+        transportMode: "NIO"
 
 server:
   port: 8082
@@ -30,6 +53,10 @@ logging:
 message:
   pipe:
     client:
-      server-address: localhost
-      server-port: 5200
-      local-port: 5201
+      local-port: 5201                      # Client listen port (can be overridden via --message.pipe.client.local-port=5201)
+      server-address: localhost             # Server address (can be overridden via --message.pipe.client.server-address=...)
+      server-port: 5200                     # Server port (can be overridden via --message.pipe.client.server-port=...)
+      network-interface: en11               # Network interface (can be overridden via --message.pipe.client.network-interface=...)
+      retry-register-times: 10              # Retry count for registration (can be overridden via --message.pipe.client.retry-register-times=...)
+      retry-register-interval-millis-seconds: 1000  # Retry interval in milliseconds (can be overridden via --message.pipe.client.retry-register-interval-millis-seconds=...)
+      heart-beat-interval-seconds: 10       # Heartbeat interval in seconds (can be overridden via --message.pipe.client.heart-beat-interval-seconds=...)

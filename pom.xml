@@ -23,7 +23,7 @@
     <properties>
         <java.version>11</java.version>
         <maven.test.skip>true</maven.test.skip>
-        <message-pipe.version>1.0.8-SNAPSHOT</message-pipe.version>
+        <message-pipe.version>1.0.9-SNAPSHOT</message-pipe.version>
         <redisson.version>3.17.7</redisson.version>
     </properties>
     <dependencies>

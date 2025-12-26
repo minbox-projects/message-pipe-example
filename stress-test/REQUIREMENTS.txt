@@ -1,0 +1,12 @@
+# MessagePipe 多管道压力测试工具 - Python 依赖
+
+# HTTP 请求库
+requests>=2.25.0
+
+# 可选：美化输出
+colorama>=0.4.4  # Windows 彩色输出支持
+
+# 开发依赖（可选）
+# pytest>=7.0.0
+# black>=22.0.0
+# flake8>=4.0.0
